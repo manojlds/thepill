@@ -1,3 +1,3 @@
 package com.stacktoheap.thepill.results
 
-data class StringResult(val result: String)
+data class StringResult(@JvmField val result: String)
