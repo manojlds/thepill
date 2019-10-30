@@ -27,7 +27,12 @@ class Schema {
         val schema = db!!.schema()
         if (!schema.getIndexes(Labels.Tree).iterator().hasNext()) {
             schema.constraintFor(Labels.Tree)
-                .assertPropertyIsUnique("id")
+                .assertPropertyIsUnique("name")
+                .create()
+        }
+        if (!schema.getIndexes(Labels.Tree).iterator().hasNext()) {
+            schema.constraintFor(Labels.Leaf)
+                .assertPropertyIsUnique("value")
                 .create()
         }
         return Stream.of(StringResult("Schema Generated"))
