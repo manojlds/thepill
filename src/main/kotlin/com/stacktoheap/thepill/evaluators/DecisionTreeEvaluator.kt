@@ -9,7 +9,7 @@ import org.neo4j.graphdb.traversal.PathEvaluator
 
 class DecisionTreeEvaluator : PathEvaluator<StateInfo> {
 
-    override fun evaluate(path: Path, branchState: BranchState<StateInfo>): Evaluation {
+    override fun evaluate(path: Path, branchState: BranchState<StateInfo>?): Evaluation {
         return when {
             path.endNode().hasLabel(Labels.Leaf) -> Evaluation.INCLUDE_AND_PRUNE
             else -> Evaluation.EXCLUDE_AND_CONTINUE

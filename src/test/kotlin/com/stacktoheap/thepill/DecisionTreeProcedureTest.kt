@@ -7,6 +7,10 @@ import org.neo4j.driver.v1.GraphDatabase
 import org.neo4j.harness.ServerControls
 import org.neo4j.harness.TestServerBuilders
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.neo4j.driver.internal.value.NodeValue
+import org.neo4j.driver.internal.value.PathValue
+import org.neo4j.driver.internal.value.StringValue
+import org.neo4j.graphdb.Path
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -52,8 +56,8 @@ class DecisionTreeProcedureTests {
             driver.session().use { session ->
                 session.run(
                     "" +
-                            "CREATE (tree:Tree { name: 'neo' })" +
-                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill', choice: 'RED' })" +
+                            "CREATE (tree:Tree { name: 'neo2' })" +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill', choice: 'result = {relationship: \"RED\"};' })" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
                             "CREATE (blue:Leaf { value: 'ignorance' })" +
                             "CREATE (tree)-[:HAS]->(pill)" +
@@ -62,10 +66,35 @@ class DecisionTreeProcedureTests {
 
                 )
 
-                val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo', {}) yield path return path")
-                    .single().get(0).asString()
+                val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo2', {}) yield path return last(nodes(path))")
+                    .single().get(0) as NodeValue
 
-                assertTrue(result == "knowledge")
+                assertTrue(result.get("value").asString() == "knowledge")
+            }
+        }
+    }
+
+    @Test
+    fun `test decision tree traversal with facts`() {
+        GraphDatabase.driver(embeddedDatabaseServer.boltURI()).use { driver ->
+            driver.session().use { session ->
+                session.run(
+                    "" +
+                            "CREATE (tree:Tree { name: 'neo3' })" +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill'," +
+                                    "choice: 'result = {relationship: \"RED\"}; if(chosenColor === \"blue\") result = {relationship: \"BLUE\"};' })" +
+                            "CREATE (red:Leaf { value: 'knowledge' })" +
+                            "CREATE (blue:Leaf { value: 'ignorance' })" +
+                            "CREATE (tree)-[:HAS]->(pill)" +
+                            "CREATE (pill)-[:RED]->(red)" +
+                            "CREATE (pill)-[:BLUE]->(blue)"
+
+                )
+
+                val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo3', {chosenColor: \"blue\"}) yield path return last(nodes(path))")
+                    .single().get(0) as NodeValue
+
+                assertTrue(result.get("value").asString() == "ignorance")
             }
         }
     }

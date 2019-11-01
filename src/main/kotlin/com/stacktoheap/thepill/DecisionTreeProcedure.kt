@@ -27,8 +27,8 @@ class DecisionTreeProcedure {
     @Procedure(name = "com.stacktoheap.thepill.make_decision", mode = Mode.READ)
     @Description("CALL com.stacktoheap.thepill.make_decision(tree, facts) - Apply the facts on the chosen decision tree")
     @Throws(IOException::class)
-    fun makeDecision(@Name("tree") id: String, @Name("facts") facts: Map<String, String>): Stream<PathResult>? {
-        val tree = db?.findNode(Labels.Tree, "id", id)
+    fun makeDecision(@Name("tree") name: String, @Name("facts") facts: Map<String, String>): Stream<PathResult>? {
+        val tree = db?.findNode(Labels.Tree, "name", name)
 
         return if (tree != null) {
             val makeDecisionTraversal = db!!.traversalDescription()
