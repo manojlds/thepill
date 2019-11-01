@@ -3,7 +3,7 @@ name: Publish Fat Jar To Github Package Repository
 on:
   push:
     tags:
-      - '*'
+      - 'v*'
 
 jobs:
   build:
