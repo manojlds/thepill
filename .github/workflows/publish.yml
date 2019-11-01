@@ -15,6 +15,6 @@ jobs:
         with:
           java-version: 1.8
       - name: Build with Gradle
-        run: ./gradlew build -Pversion=${{github.ref}}
+        run: ./gradlew build -Pversion=${GITHUB_REF#refs/tags/}
       - name: Publish to Github Package Repository
-        run: ./gradlew publish -Pversion=${{github.ref}} -Pgithub.token=${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew publish -Pversion=${GITHUB_REF#refs/tags/} -Pgithub.token=${{ secrets.GITHUB_TOKEN }}
