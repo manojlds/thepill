@@ -6,7 +6,6 @@ import com.stacktoheap.thepill.schema.RelationshipTypes
 import org.neo4j.graphdb.*
 import org.neo4j.graphdb.traversal.BranchState
 import org.neo4j.logging.Log
-import javax.script.Bindings
 
 class DecisionTreeExpander(val facts: Map<String, String>, val log: Log?):
     PathExpander<StateInfo> {
@@ -41,7 +40,19 @@ class DecisionTreeExpander(val facts: Map<String, String>, val log: Log?):
                 val result = engine.get("result") as Map<String, Any>
                 val relationshipType = result["relationship"] as String
 
-                endNode.getRelationships(Direction.OUTGOING, RelationshipType.withName(relationshipType))
+                val matchingRelationships =
+                    endNode.getRelationships(Direction.OUTGOING, RelationshipType.withName(relationshipType))
+
+                val expectedProps = result["properties"] as? Map<String, Any>
+
+                if(expectedProps.isNullOrEmpty()) {
+                    matchingRelationships
+                } else {
+                    matchingRelationships.filter {
+                        expectedProps.entries.containsAll(it.allProperties.entries)
+                    }
+                }
+
             } catch (e: Exception) {
                 log!!.info("Decision Tree Traversal failed", e)
                 listOf<Relationship>()

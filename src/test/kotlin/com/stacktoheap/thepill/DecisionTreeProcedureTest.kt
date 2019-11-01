@@ -1,16 +1,13 @@
 package com.stacktoheap.thepill
 
 import com.stacktoheap.thepill.schema.Schema
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.neo4j.driver.internal.value.NodeValue
 import org.neo4j.driver.v1.GraphDatabase
 import org.neo4j.harness.ServerControls
 import org.neo4j.harness.TestServerBuilders
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.neo4j.driver.internal.value.NodeValue
-import org.neo4j.driver.internal.value.PathValue
-import org.neo4j.driver.internal.value.StringValue
-import org.neo4j.graphdb.Path
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -92,6 +89,31 @@ class DecisionTreeProcedureTests {
                 )
 
                 val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo3', {chosenColor: \"blue\"}) yield path return last(nodes(path))")
+                    .single().get(0) as NodeValue
+
+                assertTrue(result.get("value").asString() == "ignorance")
+            }
+        }
+    }
+
+    @Test
+    fun `test decision tree traversal with relationship properties`() {
+        GraphDatabase.driver(embeddedDatabaseServer.boltURI()).use { driver ->
+            driver.session().use { session ->
+                session.run(
+                    "" +
+                            "CREATE (tree:Tree { name: 'neo4' })" +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill'," +
+                                    "choice: 'result = {relationship: \"COLOR\", properties: {color: \"red\"}}; if(chosenColor === \"blue\") result = {relationship: \"COLOR\" , properties: {color: \"blue\"}};' })" +
+                            "CREATE (red:Leaf { value: 'knowledge' })" +
+                            "CREATE (blue:Leaf { value: 'ignorance' })" +
+                            "CREATE (tree)-[:HAS]->(pill)" +
+                            "CREATE (pill)-[:COLOR {color: 'red'}]->(red)" +
+                            "CREATE (pill)-[:COLOR {color: 'blue'}]->(blue)"
+
+                )
+
+                val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo4', {chosenColor: \"blue\"}) yield path return last(nodes(path))")
                     .single().get(0) as NodeValue
 
                 assertTrue(result.get("value").asString() == "ignorance")
