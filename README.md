@@ -98,3 +98,14 @@ CALL com.stacktoheap.thepill.schema.generate
 Compile and run tests with `./gradlew build`
 
 Create fat jar with `./gradlew shadowJar` 
+
+## Note
+
+Based on - https://github.com/maxdemarzi/decision_trees_with_rules
+
+Differs in the following ways:
+
+1. Uses Javascript for script evaluation rather than Java.
+2. Ability to choose relationships based on properties.
+3. No insecure APIs usage.
+4. Updated for latest Neo4j and written in Kotlin.
