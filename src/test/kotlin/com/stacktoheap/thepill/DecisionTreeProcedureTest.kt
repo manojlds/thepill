@@ -1,9 +1,8 @@
 package com.stacktoheap.thepill
 
 import com.stacktoheap.thepill.schema.Schema
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.neo4j.driver.internal.value.NodeValue
@@ -21,9 +20,7 @@ class DecisionTreeProcedureTests {
         .withProcedure(DecisionTreeProcedure::class.java)
 
         .withFixture(
-            ""
-
-            + "CALL com.stacktoheap.thepill.schema.generate"
+             "CALL com.stacktoheap.thepill.schema.generate"
         )
         .newServer();
 
