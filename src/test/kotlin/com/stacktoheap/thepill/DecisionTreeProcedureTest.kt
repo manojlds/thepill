@@ -1,7 +1,9 @@
 package com.stacktoheap.thepill
 
 import com.stacktoheap.thepill.schema.Schema
+import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.neo4j.driver.internal.value.NodeValue
@@ -117,6 +119,29 @@ class DecisionTreeProcedureTests {
                     .single().get(0) as NodeValue
 
                 assertTrue(result.get("value").asString() == "ignorance")
+            }
+        }
+    }
+
+    @Test
+    fun `test multi decision result`() {
+        GraphDatabase.driver(embeddedDatabaseServer.boltURI()).use { driver ->
+            driver.session().use { session ->
+                session.run(
+                    "" +
+                            "CREATE (tree:Tree { name: 'neo5' })" +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill'," +
+                                    "choice: 'result = {relationship: \"COLOR\" };'})" +
+                            "CREATE (red:Leaf { value: 'knowledge' })" +
+                            "CREATE (blue:Leaf { value: 'ignorance' })" +
+                            "CREATE (tree)-[:HAS]->(pill)" +
+                            "CREATE (pill)-[:COLOR {color: 'red'}]->(red)" +
+                            "CREATE (pill)-[:COLOR {color: 'blue'}]->(blue)"
+
+                )
+
+                val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo5', {chosenColor: \"blue\"}) yield path return last(nodes(path)).value").list()
+                assertThat(result.map { it.get(0).asString() }).containsAll(listOf("knowledge", "ignorance"))
             }
         }
     }
