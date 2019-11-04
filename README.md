@@ -1,6 +1,8 @@
 # thepill
 Decision Trees with Neo4J
 
+![](https://github.com/manojlds/thepill/workflows/Build/badge.svg)
+
 <p align="center">
 <img src="docs/images/decision_tree.png" width="300px"/>
 </p>
