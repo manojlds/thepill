@@ -23,6 +23,11 @@ CREATE (tree)-[:HAS]->(pill)
 CREATE (pill)-[:RED]->(red)
 CREATE (pill)-[:BLUE]->(blue)
 ```
+Traverse the decision tree and make a decision:
+
+```
+CALL com.stacktoheap.thepill.make_decision('neo', {chosenColor: "blue"}) yield path return path
+```
 
 
 ## Example explained
@@ -67,6 +72,11 @@ Traverse the tree and make decision:
 ```
 CALL com.stacktoheap.thepill.make_decision('neo', {chosenColor: "blue"}) yield path return path
 ```
+
+<p align="center">
+<img src="docs/images/traversal_example.png" width="600px"/>
+</p>
+
  
 
 ## Installation
