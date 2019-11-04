@@ -14,7 +14,30 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
+      - name: Setup tag name
+        id: setup_tag_name
+        run: |
+          echo ::set-output name=tag_name::${GITHUB_REF#refs/tags/}
       - name: Build with Gradle
-        run: ./gradlew build -Pversion=${GITHUB_REF#refs/tags/}
+        run: ./gradlew build -Pversion=${{ steps.setup_tag_name.outputs.tag_name }}
       - name: Publish to Github Package Repository
-        run: ./gradlew publish -Pversion=${GITHUB_REF#refs/tags/} -Pgithub.token=${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew publish -Pversion=${{ steps.setup_tag_name.outputs.tag_name }} -Pgithub.token=${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/libs/thepill-${{ steps.setup_tag_name.outputs.tag_name }}-all.jar
+          asset_name: thepill-${{ steps.setup_tag_name.outputs.tag_name }}-all.jar
+          asset_content_type: application/zip
