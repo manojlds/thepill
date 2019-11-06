@@ -72,10 +72,15 @@ class DecisionTreeProcedureTests {
 
                 )
 
-                val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo', {}) yield path return last(nodes(path))")
+                val resultFromTree = session.run("CALL com.stacktoheap.thepill.make_decision('neo', {}) yield path return last(nodes(path))")
                     .single().get(0) as NodeValue
 
-                assertTrue(result.get("value").asString() == "knowledge")
+                assertTrue(resultFromTree.get("value").asString() == "knowledge")
+
+                val resultFromDecision = session.run("CALL com.stacktoheap.thepill.make_decision('Red Pill Or Blue Pill', {}) yield path return last(nodes(path))")
+                    .single().get(0) as NodeValue
+
+                assertTrue(resultFromDecision.get("value").asString() == "knowledge")
             }
         }
     }
@@ -97,10 +102,15 @@ class DecisionTreeProcedureTests {
 
                 )
 
-                val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo', {chosenColor: \"blue\"}) yield path return last(nodes(path))")
+                val resultFromTree = session.run("CALL com.stacktoheap.thepill.make_decision('neo', {chosenColor: \"blue\"}) yield path return last(nodes(path))")
                     .single().get(0) as NodeValue
 
-                assertTrue(result.get("value").asString() == "ignorance")
+                assertTrue(resultFromTree.get("value").asString() == "ignorance")
+
+                val resultFromDecision = session.run("CALL com.stacktoheap.thepill.make_decision('Red Pill Or Blue Pill', {chosenColor: \"blue\"}) yield path return last(nodes(path))")
+                    .single().get(0) as NodeValue
+
+                assertTrue(resultFromDecision.get("value").asString() == "ignorance")
             }
         }
     }
