@@ -3,6 +3,7 @@ package com.stacktoheap.thepill
 import com.stacktoheap.thepill.schema.Schema
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.neo4j.driver.internal.value.NodeValue
@@ -24,13 +25,22 @@ class DecisionTreeProcedureTests {
         )
         .newServer();
 
+    @BeforeEach
+    fun `set up`() {
+        GraphDatabase.driver(embeddedDatabaseServer.boltURI()).use { driver ->
+            driver.session().use { session ->
+                session.run("MATCH (n) DETACH DELETE n")
+            }
+        }
+    }
+
     @Test
     fun `test decision tree root creation`() {
         GraphDatabase.driver(embeddedDatabaseServer.boltURI()).use { driver ->
             driver.session().use { session ->
-                val result = session.run("CREATE (tree:Tree { name: 'neo1' }) RETURN tree.name")
+                val result = session.run("CREATE (tree:Tree { name: 'neo' }) RETURN tree.name")
                     .single().get(0).asString()
-                assertTrue(result == "neo1")
+                assertTrue(result == "neo")
             }
         }
     }
@@ -52,7 +62,7 @@ class DecisionTreeProcedureTests {
             driver.session().use { session ->
                 session.run(
                     "" +
-                            "CREATE (tree:Tree { name: 'neo2' })" +
+                            "CREATE (tree:Tree { name: 'neo' })" +
                             "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill', choice: 'result = {relationship: \"RED\"};' })" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
                             "CREATE (blue:Leaf { value: 'ignorance' })" +
@@ -62,7 +72,7 @@ class DecisionTreeProcedureTests {
 
                 )
 
-                val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo2', {}) yield path return last(nodes(path))")
+                val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo', {}) yield path return last(nodes(path))")
                     .single().get(0) as NodeValue
 
                 assertTrue(result.get("value").asString() == "knowledge")
@@ -76,7 +86,7 @@ class DecisionTreeProcedureTests {
             driver.session().use { session ->
                 session.run(
                     "" +
-                            "CREATE (tree:Tree { name: 'neo3' })" +
+                            "CREATE (tree:Tree { name: 'neo' })" +
                             "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill'," +
                                     "choice: 'result = {relationship: \"RED\"}; if(chosenColor === \"blue\") result = {relationship: \"BLUE\"};' })" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
@@ -87,7 +97,7 @@ class DecisionTreeProcedureTests {
 
                 )
 
-                val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo3', {chosenColor: \"blue\"}) yield path return last(nodes(path))")
+                val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo', {chosenColor: \"blue\"}) yield path return last(nodes(path))")
                     .single().get(0) as NodeValue
 
                 assertTrue(result.get("value").asString() == "ignorance")
@@ -101,7 +111,7 @@ class DecisionTreeProcedureTests {
             driver.session().use { session ->
                 session.run(
                     "" +
-                            "CREATE (tree:Tree { name: 'neo4' })" +
+                            "CREATE (tree:Tree { name: 'neo' })" +
                             "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill'," +
                                     "choice: 'result = {relationship: \"COLOR\", properties: {color: \"red\"}}; if(chosenColor === \"blue\") result = {relationship: \"COLOR\" , properties: {color: \"blue\"}};' })" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
@@ -112,7 +122,7 @@ class DecisionTreeProcedureTests {
 
                 )
 
-                val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo4', {chosenColor: \"blue\"}) yield path return last(nodes(path))")
+                val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo', {chosenColor: \"blue\"}) yield path return last(nodes(path))")
                     .single().get(0) as NodeValue
 
                 assertTrue(result.get("value").asString() == "ignorance")
@@ -126,7 +136,7 @@ class DecisionTreeProcedureTests {
             driver.session().use { session ->
                 session.run(
                     "" +
-                            "CREATE (tree:Tree { name: 'neo5' })" +
+                            "CREATE (tree:Tree { name: 'neo' })" +
                             "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill'," +
                                     "choice: 'result = {relationship: \"COLOR\" };'})" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
@@ -137,7 +147,7 @@ class DecisionTreeProcedureTests {
 
                 )
 
-                val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo5', {chosenColor: \"blue\"}) yield path return last(nodes(path)).value").list()
+                val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo', {chosenColor: \"blue\"}) yield path return last(nodes(path)).value").list()
                 assertThat(result.map { it.get(0).asString() }).containsAll(listOf("knowledge", "ignorance"))
             }
         }
