@@ -30,11 +30,17 @@ class Schema {
                 .assertPropertyIsUnique("name")
                 .create()
         }
-        if (!schema.getIndexes(Labels.Tree).iterator().hasNext()) {
+        if (!schema.getIndexes(Labels.Decision).iterator().hasNext()) {
+            schema.constraintFor(Labels.Decision)
+                .assertPropertyIsUnique("name")
+                .create()
+        }
+        if (!schema.getIndexes(Labels.Leaf).iterator().hasNext()) {
             schema.constraintFor(Labels.Leaf)
                 .assertPropertyIsUnique("value")
                 .create()
         }
+        
         return Stream.of(StringResult("Schema Generated"))
     }
 }
