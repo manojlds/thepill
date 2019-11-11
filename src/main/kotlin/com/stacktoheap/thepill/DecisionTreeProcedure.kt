@@ -27,13 +27,13 @@ class DecisionTreeProcedure {
     @Procedure(name = "com.stacktoheap.thepill.make_decision", mode = Mode.READ)
     @Description("CALL com.stacktoheap.thepill.make_decision(tree, facts) - Apply the facts on the chosen decision tree")
     @Throws(IOException::class)
-    fun makeDecision(@Name("tree") name: String, @Name("facts") facts: Map<String, String>): Stream<PathResult>? {
+    fun makeDecision(@Name("tree") name: String, @Name("facts") facts: Map<String, String>, @Name("ignoreMissingParameters", defaultValue = "false") ignoreMissingParameters: Boolean = false): Stream<PathResult>? {
         val startNode = db?.findNode(Labels.Tree, "name", name) ?: db?.findNode(Labels.Decision, "name", name)
 
         return if (startNode != null) {
             val makeDecisionTraversal = db!!.traversalDescription()
                 .depthFirst()
-                .expand(DecisionTreeExpander(facts, log))
+                .expand(DecisionTreeExpander(facts, ignoreMissingParameters, log))
                 .evaluator(decisionTreeEvaluator)
 
             makeDecisionTraversal.traverse(startNode).stream().map { PathResult(it) }

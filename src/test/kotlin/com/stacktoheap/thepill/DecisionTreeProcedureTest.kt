@@ -162,4 +162,27 @@ class DecisionTreeProcedureTests {
             }
         }
     }
+
+    @Test
+    fun `test traversal with missing parameters ignored`() {
+        GraphDatabase.driver(embeddedDatabaseServer.boltURI()).use { driver ->
+            driver.session().use { session ->
+                session.run(
+                    "" +
+                            "CREATE (tree:Tree { name: 'neo' })" +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill', parameters: ['chosenColor']," +
+                            "choice: 'result = {relationship: \"COLOR\", properties: {color: \"red\"}}; if(chosenColor === \"blue\") result = {relationship: \"COLOR\" , properties: {color: \"blue\"}};' })" +
+                            "CREATE (red:Leaf { value: 'knowledge' })" +
+                            "CREATE (blue:Leaf { value: 'ignorance' })" +
+                            "CREATE (tree)-[:HAS]->(pill)" +
+                            "CREATE (pill)-[:COLOR {color: 'red'}]->(red)" +
+                            "CREATE (pill)-[:COLOR {color: 'blue'}]->(blue)"
+
+                )
+
+                val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo', {}, true) yield path return last(nodes(path)).value").list()
+                assertThat(result.map { it.get(0).asString() }).containsAll(listOf("knowledge", "ignorance"))
+            }
+        }
+    }
 }
