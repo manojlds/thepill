@@ -1,61 +1,69 @@
 plugins {
     id 'com.github.johnrengelman.shadow' version '5.1.0'
     id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '1.3.41'
+    id 'org.jetbrains.kotlin.jvm' version '1.3.50'
     id 'maven-publish'
 }
 
-group 'com.stacktoheap'
+allprojects {
+    apply plugin: 'com.github.johnrengelman.shadow'
+    apply plugin: 'java'
+    apply plugin: 'org.jetbrains.kotlin.jvm'
+    apply plugin: 'maven-publish'
 
-sourceCompatibility = 1.8
+    group 'com.stacktoheap'
 
-repositories {
-    mavenCentral()
-}
+    sourceCompatibility = 1.8
 
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    compileOnly group: 'org.neo4j', name: 'neo4j', version: '3.5.12'
-    testCompile  group: 'org.neo4j.test', name: 'neo4j-harness', version: '3.5.12'
-    testCompile  group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: '1.7.5'
-    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.5.2'
-    testCompile group: 'org.assertj', name: 'assertj-neo4j', version: '2.0.1'
-
-}
-
-compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
-}
-
-compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
-}
-
-test {
-    useJUnitPlatform()
-    testLogging {
-        events "passed", "skipped", "failed"
-    }
-}
-
-publishing {
     repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/manojlds/thepill")
-            credentials {
-                username = findProperty("github.username")
-                password = findProperty("github.token")
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+        compileOnly group: 'org.neo4j', name: 'neo4j', version: '3.5.12'
+        testCompile group: 'org.neo4j.test', name: 'neo4j-harness', version: '3.5.12'
+        testCompile group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: '1.7.5'
+        testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.5.2'
+        testCompile group: 'org.assertj', name: 'assertj-neo4j', version: '2.0.1'
+
+    }
+
+    compileKotlin {
+        kotlinOptions.jvmTarget = "1.8"
+    }
+
+    compileTestKotlin {
+        kotlinOptions.jvmTarget = "1.8"
+    }
+
+    test {
+        useJUnitPlatform()
+        testLogging {
+            events "passed", "skipped", "failed"
+        }
+    }
+
+    publishing {
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/manojlds/thepill")
+                credentials {
+                    username = findProperty("github.username")
+                    password = findProperty("github.token")
+                }
+            }
+        }
+        publications {
+            gpr(MavenPublication) {
+                groupId = 'com.stacktoheap'
+                artifactId = 'thepill'
+                version = version
+                from components.java
+                artifact shadowJar
             }
         }
     }
-    publications {
-        gpr(MavenPublication) {
-            groupId = 'com.stacktoheap'
-            artifactId = 'thepill'
-            version = version
-            from components.java
-            artifact shadowJar
-        }
-    }
+
 }
