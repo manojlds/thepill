@@ -1,3 +1,4 @@
 rootProject.name = 'thepill'
 
 include 'thepill-procedure'
+include 'thepill-extension'

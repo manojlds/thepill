@@ -6,18 +6,20 @@ plugins {
 }
 
 allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
     apply plugin: 'com.github.johnrengelman.shadow'
+    apply plugin: 'maven-publish'
     apply plugin: 'java'
     apply plugin: 'org.jetbrains.kotlin.jvm'
-    apply plugin: 'maven-publish'
 
     group 'com.stacktoheap'
 
     sourceCompatibility = 1.8
-
-    repositories {
-        mavenCentral()
-    }
 
     dependencies {
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
@@ -66,4 +68,14 @@ allprojects {
         }
     }
 
+}
+
+project(":thepill-procedure") {
+}
+
+project(":thepill-extension") {
+    dependencies {
+        compileOnly group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0'
+        compile group: 'org.codehaus.jackson', name: 'jackson-mapper-asl', version: '1.9.7'
+    }
 }
