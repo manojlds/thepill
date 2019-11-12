@@ -7,7 +7,7 @@ import org.neo4j.graphdb.*
 import org.neo4j.graphdb.traversal.BranchState
 import org.neo4j.logging.Log
 
-class DecisionTreeExpander(val facts: Map<String, String>, val ignoreMissingParameters: Boolean, val log: Log?):
+class DecisionTreeExpander(val facts: Map<String, Any>, val ignoreMissingParameters: Boolean, val log: Log?):
     PathExpander<StateInfo> {
     private val scriptEngineManager = javax.script.ScriptEngineManager()
 
