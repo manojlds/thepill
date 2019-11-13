@@ -32,12 +32,21 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-      - name: Upload Release Asset
+      - name: Upload thepill-procedure Release Asset
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/libs/thepill-${{ steps.setup_tag_name.outputs.tag_name }}-all.jar
-          asset_name: thepill-${{ steps.setup_tag_name.outputs.tag_name }}-all.jar
+          asset_path: ./thepill-procedure/build/libs/thepill-procedure-${{ steps.setup_tag_name.outputs.tag_name }}-all.jar
+          asset_name: thepill-procedure-${{ steps.setup_tag_name.outputs.tag_name }}-all.jar
+          asset_content_type: application/zip
+      - name: Upload thepill-extension Release Asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./thepill-extension/build/libs/thepill-extension-${{ steps.setup_tag_name.outputs.tag_name }}-all.jar
+          asset_name: thepill-extension-${{ steps.setup_tag_name.outputs.tag_name }}-all.jar
           asset_content_type: application/zip
