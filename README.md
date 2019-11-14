@@ -79,19 +79,51 @@ CALL com.stacktoheap.thepill.make_decision('neo', {chosenColor: "blue"}) yield p
 
  
 
-## Installation
+## Procedure Installation
 
 1. Download the latest jar from https://github.com/manojlds/thepill/releases
 
 2. Copy the jar to the plugins folder of Neo4J instance - `<neo4j-home>/plugins`
 
-3. (Re)Start the server
+3. To use property based leaves, set the following configuration in `<neo4j-home>/conf/neo4j.conf`:
 
-4. Apply the schema for thepill:
+    ```
+    thepill.property_based_leaves=true
+    thepill.thepill.leaves_property=is_leaf
+    ```
 
-```cypher
-CALL com.stacktoheap.thepill.schema.generate
-```
+    With property based leaves enabled, existing nodes can be reused as leaves in the decision tree by adding the property specified by the `thepill.thepill.leaves_property` configuration.
+
+4. (Re)Start the server
+
+5. Apply the schema for thepill:
+
+    ```cypher
+    CALL com.stacktoheap.thepill.schema.generate
+    ```
+    
+ ## Extension Installation
+ 
+ The optional unmanaged server extension can be installed as follows:
+ 
+ 1. Download the latest jar from https://github.com/manojlds/thepill/releases
+ 
+ 2. Copy the jar to the plugins folder of Neo4J instance - `<neo4j-home>/plugins`
+ 
+ 3. Add the following configuration in `<neo4j-home>/conf/neo4j.conf`:
+ 
+    ```
+    dbms.unmanaged_extension_classes=com.stacktoheap.thepill=/thepill
+
+    ```
+ 4. Restart the server
+ 
+ 5. The `<server>/thepill/make_decision` endpoint is available for use. Example:
+ 
+    ```shell
+    curl -H 'Content-Type: application/json' -X POST  http://localhost:7474/thepill/make_decision/neo -d "{\"chosenColor\": \"blue\"}"
+    ```
+  
 
 ## Build
 
