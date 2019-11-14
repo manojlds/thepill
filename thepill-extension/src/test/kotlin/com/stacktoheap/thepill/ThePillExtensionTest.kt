@@ -16,7 +16,7 @@ class ThePillExtensionTest {
     private val embeddedDatabaseServer: ServerControls = TestServerBuilders
         .newInProcessBuilder()
         .withProcedure(Schema::class.java)
-        .withProcedure(DecisionTreeProcedure::class.java)
+        .withProcedure(ThePillProcedure::class.java)
         .withExtension("/thepill", ThePillExtension::class.java)
         .withFixture(
             "CALL com.stacktoheap.thepill.schema.generate"

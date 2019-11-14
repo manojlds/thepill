@@ -13,12 +13,12 @@ import org.neo4j.harness.TestServerBuilders
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class DecisionTreeProcedureTests {
+class ThePillProcedureTest {
 
     private val embeddedDatabaseServer: ServerControls = TestServerBuilders
         .newInProcessBuilder()
         .withProcedure(Schema::class.java)
-        .withProcedure(DecisionTreeProcedure::class.java)
+        .withProcedure(ThePillProcedure::class.java)
 
         .withFixture(
              "CALL com.stacktoheap.thepill.schema.generate"

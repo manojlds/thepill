@@ -12,7 +12,7 @@ import java.io.IOException
 import java.util.stream.Stream
 
 
-class DecisionTreeProcedure {
+class ThePillProcedure {
     @Context
     @JvmField
     var db: GraphDatabaseService? = null

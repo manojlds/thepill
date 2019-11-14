@@ -23,7 +23,7 @@ class ThePillLifecycle(val configuration: Config, private val log: LogService): 
     private val logger = log.getUserLog(ThePillLifecycle::class.java)
     override fun start() {
         logger.info("Intializing thepill procedure")
-        val settings = DecisionTreeProcedure.initSettings(configuration.raw)
+        val settings = ThePillProcedure.initSettings(configuration.raw)
         logger.info("Thepill using settings - $settings")
         logger.info("Intialized thepill procedure")
 
