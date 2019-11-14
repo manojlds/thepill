@@ -1,5 +1,6 @@
 package com.stacktoheap.thepill.expanders
 
+import com.stacktoheap.thepill.models.Settings
 import com.stacktoheap.thepill.models.StateInfo
 import com.stacktoheap.thepill.schema.Labels
 import com.stacktoheap.thepill.schema.RelationshipTypes
@@ -7,7 +8,7 @@ import org.neo4j.graphdb.*
 import org.neo4j.graphdb.traversal.BranchState
 import org.neo4j.logging.Log
 
-class DecisionTreeExpander(val facts: Map<String, Any>, val ignoreMissingParameters: Boolean, val log: Log?):
+class DecisionTreeExpander(private val facts: Map<String, Any>, private val ignoreMissingParameters: Boolean, private val settings: Settings, private val log: Log?):
     PathExpander<StateInfo> {
     private val scriptEngineManager = javax.script.ScriptEngineManager()
 
@@ -19,7 +20,8 @@ class DecisionTreeExpander(val facts: Map<String, Any>, val ignoreMissingParamet
     override fun expand(path: Path, state: BranchState<StateInfo>?): Iterable<Relationship> {
         val endNode = path.endNode()
         return when {
-            endNode.hasLabel(Labels.Leaf) -> listOf()
+            settings.propertyBasedLeaves and endNode.getProperty(settings.leavesProperty, false).toString().toBoolean()  -> listOf()
+            !settings.propertyBasedLeaves and endNode.hasLabel(Labels.Leaf) -> listOf()
             endNode.hasRelationship(
                 Direction.OUTGOING,
                 RelationshipTypes.HAS

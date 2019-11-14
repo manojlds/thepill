@@ -9,25 +9,26 @@ import org.junit.jupiter.api.TestInstance
 import org.neo4j.driver.internal.value.NodeValue
 import org.neo4j.driver.v1.GraphDatabase
 import org.neo4j.harness.ServerControls
+import org.neo4j.harness.TestServerBuilder
 import org.neo4j.harness.TestServerBuilders
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ThePillProcedureTest {
+class ThePillProcedureLeafEntityTest {
 
-    private val embeddedDatabaseServer: ServerControls = TestServerBuilders
+    private val dbServer: ServerControls = getDbServer().newServer();
+
+    private fun getDbServer(): TestServerBuilder = TestServerBuilders
         .newInProcessBuilder()
         .withProcedure(Schema::class.java)
         .withProcedure(ThePillProcedure::class.java)
-
         .withFixture(
-             "CALL com.stacktoheap.thepill.schema.generate"
+            "CALL com.stacktoheap.thepill.schema.generate"
         )
-        .newServer();
 
     @BeforeEach
     fun `set up`() {
-        GraphDatabase.driver(embeddedDatabaseServer.boltURI()).use { driver ->
+        GraphDatabase.driver(dbServer.boltURI()).use { driver ->
             driver.session().use { session ->
                 session.run("MATCH (n) DETACH DELETE n")
             }
@@ -36,7 +37,7 @@ class ThePillProcedureTest {
 
     @Test
     fun `test decision tree root creation`() {
-        GraphDatabase.driver(embeddedDatabaseServer.boltURI()).use { driver ->
+        GraphDatabase.driver(dbServer.boltURI()).use { driver ->
             driver.session().use { session ->
                 val result = session.run("CREATE (tree:Tree { name: 'neo' }) RETURN tree.name")
                     .single().get(0).asString()
@@ -47,7 +48,7 @@ class ThePillProcedureTest {
 
     @Test
     fun `test leaf creation`() {
-        GraphDatabase.driver(embeddedDatabaseServer.boltURI()).use { driver ->
+        GraphDatabase.driver(dbServer.boltURI()).use { driver ->
             driver.session().use { session ->
                 val result = session.run("CREATE (leaf:Leaf { value: 'red pill' }) RETURN leaf.value")
                     .single().get(0).asString()
@@ -58,7 +59,7 @@ class ThePillProcedureTest {
 
     @Test
     fun `test decision tree traversal`() {
-        GraphDatabase.driver(embeddedDatabaseServer.boltURI()).use { driver ->
+        GraphDatabase.driver(dbServer.boltURI()).use { driver ->
             driver.session().use { session ->
                 session.run(
                     "" +
@@ -87,7 +88,7 @@ class ThePillProcedureTest {
 
     @Test
     fun `test decision tree traversal with facts`() {
-        GraphDatabase.driver(embeddedDatabaseServer.boltURI()).use { driver ->
+        GraphDatabase.driver(dbServer.boltURI()).use { driver ->
             driver.session().use { session ->
                 session.run(
                     "" +
@@ -117,7 +118,7 @@ class ThePillProcedureTest {
 
     @Test
     fun `test decision tree traversal with relationship properties`() {
-        GraphDatabase.driver(embeddedDatabaseServer.boltURI()).use { driver ->
+        GraphDatabase.driver(dbServer.boltURI()).use { driver ->
             driver.session().use { session ->
                 session.run(
                     "" +
@@ -142,7 +143,7 @@ class ThePillProcedureTest {
 
     @Test
     fun `test multi decision result`() {
-        GraphDatabase.driver(embeddedDatabaseServer.boltURI()).use { driver ->
+        GraphDatabase.driver(dbServer.boltURI()).use { driver ->
             driver.session().use { session ->
                 session.run(
                     "" +
@@ -165,7 +166,7 @@ class ThePillProcedureTest {
 
     @Test
     fun `test traversal with missing parameters ignored`() {
-        GraphDatabase.driver(embeddedDatabaseServer.boltURI()).use { driver ->
+        GraphDatabase.driver(dbServer.boltURI()).use { driver ->
             driver.session().use { session ->
                 session.run(
                     "" +
@@ -182,6 +183,59 @@ class ThePillProcedureTest {
 
                 val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo', {}, true) yield path return last(nodes(path)).value").list()
                 assertThat(result.map { it.get(0).asString() }).containsAll(listOf("knowledge", "ignorance"))
+            }
+        }
+    }
+}
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class ThePillProcedureLeafPropertyTest {
+
+    private val dbServer: ServerControls =
+        getDbServer().withConfig("thepill.property_based_leaves", "true").newServer()
+
+    private fun getDbServer(): TestServerBuilder = TestServerBuilders
+        .newInProcessBuilder()
+        .withProcedure(Schema::class.java)
+        .withProcedure(ThePillProcedure::class.java)
+        .withFixture(
+            "CALL com.stacktoheap.thepill.schema.generate"
+        )
+
+    @BeforeEach
+    fun `set up`() {
+        GraphDatabase.driver(dbServer.boltURI()).use { driver ->
+            driver.session().use { session ->
+                session.run("MATCH (n) DETACH DELETE n")
+            }
+        }
+    }
+
+    @Test
+    fun `test decision tree traversal with property based leaves`() {
+        GraphDatabase.driver(dbServer.boltURI()).use { driver ->
+            driver.session().use { session ->
+                session.run(
+                    "" +
+                            "CREATE (tree:Tree { name: 'neo' })" +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill', choice: 'result = {relationship: \"RED\"};' })" +
+                            "CREATE (red:Pill { is_leaf: true, value: 'knowledge' })" +
+                            "CREATE (blue:Pill { is_leaf: true, value: 'ignorance' })" +
+                            "CREATE (tree)-[:HAS]->(pill)" +
+                            "CREATE (pill)-[:RED]->(red)" +
+                            "CREATE (pill)-[:BLUE]->(blue)"
+
+                )
+
+                val resultFromTree = session.run("CALL com.stacktoheap.thepill.make_decision('neo', {}) yield path return last(nodes(path))")
+                    .single().get(0) as NodeValue
+
+                assertTrue(resultFromTree.get("value").asString() == "knowledge")
+
+                val resultFromDecision = session.run("CALL com.stacktoheap.thepill.make_decision('Red Pill Or Blue Pill', {}) yield path return last(nodes(path))")
+                    .single().get(0) as NodeValue
+
+                assertTrue(resultFromDecision.get("value").asString() == "knowledge")
             }
         }
     }

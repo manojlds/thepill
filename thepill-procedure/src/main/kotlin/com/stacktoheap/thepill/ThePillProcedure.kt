@@ -22,12 +22,13 @@ class ThePillProcedure {
     var log: Log? = null
 
     companion object {
-        val decisionTreeEvaluator = DecisionTreeEvaluator()
+        lateinit var decisionTreeEvaluator: DecisionTreeEvaluator
 
         lateinit var settings: Settings
 
         fun initSettings(config: Map<String, String>): Settings {
             this.settings = Settings.from(config)
+            this.decisionTreeEvaluator = DecisionTreeEvaluator(this.settings)
             return this.settings
         }
     }
@@ -41,7 +42,7 @@ class ThePillProcedure {
         return if (startNode != null) {
             val makeDecisionTraversal = db!!.traversalDescription()
                 .depthFirst()
-                .expand(DecisionTreeExpander(facts, ignoreMissingParameters, log))
+                .expand(DecisionTreeExpander(facts, ignoreMissingParameters, settings, log))
                 .evaluator(decisionTreeEvaluator)
 
             makeDecisionTraversal.traverse(startNode).stream().map { PathResult(it) }
