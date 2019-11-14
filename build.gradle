@@ -60,7 +60,7 @@ subprojects {
         publications {
             gpr(MavenPublication) {
                 groupId = 'com.stacktoheap'
-                artifactId = 'thepill'
+                artifactId = "$project.name"
                 version = version
                 from components.java
                 artifact shadowJar
