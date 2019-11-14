@@ -2,6 +2,7 @@ package com.stacktoheap.thepill
 
 import com.stacktoheap.thepill.evaluators.DecisionTreeEvaluator
 import com.stacktoheap.thepill.expanders.DecisionTreeExpander
+import com.stacktoheap.thepill.models.Settings
 import com.stacktoheap.thepill.results.PathResult
 import com.stacktoheap.thepill.schema.Labels
 import org.neo4j.graphdb.*
@@ -22,6 +23,13 @@ class DecisionTreeProcedure {
 
     companion object {
         val decisionTreeEvaluator = DecisionTreeEvaluator()
+
+        lateinit var settings: Settings
+
+        fun initSettings(config: Map<String, String>): Settings {
+            this.settings = Settings.from(config)
+            return this.settings
+        }
     }
 
     @Procedure(name = "com.stacktoheap.thepill.make_decision", mode = Mode.READ)
