@@ -49,7 +49,7 @@ class ThePillExtensionTest {
                             "CREATE (pill)-[:COLOR {color: 'blue'}]->(blue)"
 
                 )
-
+                Thread.sleep(1000) //TODO: HACK. Failing randomly without this
                 val response = HTTP.POST(embeddedDatabaseServer.httpURI().resolve("/thepill/make_decision/neo").toString(), mapOf<String, String>())
                 assertTrue(response.status() == 200)
                 val result = response.content<List<Map<String, String>>>()
@@ -74,6 +74,7 @@ class ThePillExtensionTest {
 
                 )
 
+                Thread.sleep(1000) //TODO: HACK. Failing randomly without this
                 val response = HTTP.POST(embeddedDatabaseServer.httpURI().resolve("/thepill/next_step/neo").toString(), mapOf<String, String>())
                 assertTrue(response.status() == 200)
 
