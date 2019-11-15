@@ -54,7 +54,34 @@ class ThePillExtensionTest {
                 val response = HTTP.POST(embeddedDatabaseServer.httpURI().resolve("/thepill/make_decision/neo").toString(), "{}")
                 assertTrue(response.status() == 200)
                 val result = response.content<List<Map<String, String>>>()
-                assertThat(result.flatMap { it.values }.containsAll(listOf("knowledge", "ignorance")))
+                assertThat(result.flatMap { it.values }).containsAll(listOf("knowledge", "ignorance"))
+            }
+        }
+    }
+
+    @Test
+    fun `test decision step traversal`() {
+        GraphDatabase.driver(embeddedDatabaseServer.boltURI()).use { driver ->
+            driver.session().use { session ->
+                session.run(
+                    "" +
+                            "CREATE (tree:Tree { name: 'neo' })" +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', parameters:['chosenColor'], question: 'Red Pill Or Blue Pill', choice: 'result = {relationship: \"RED\"};' })" +
+                            "CREATE (red:Leaf { value: 'knowledge' })" +
+                            "CREATE (blue:Leaf { value: 'ignorance' })" +
+                            "CREATE (tree)-[:HAS]->(pill)" +
+                            "CREATE (pill)-[:RED]->(red)" +
+                            "CREATE (pill)-[:BLUE]->(blue)"
+
+                )
+
+                val response = HTTP.POST(embeddedDatabaseServer.httpURI().resolve("/thepill/next_step/neo").toString(), "{}")
+                assertTrue(response.status() == 200)
+                val result = response.content<List<Map<String, Map<String, String>>>>()
+
+                val decisionResult = result[0]["stepResult"]
+
+                assertThat(decisionResult!!["question"] == "Red Pill Or Blue Pill")
 
 
             }
