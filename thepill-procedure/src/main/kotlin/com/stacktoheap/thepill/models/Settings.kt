@@ -9,7 +9,6 @@ private object SettingsKeys {
 data class Settings(val propertyBasedLeaves: Boolean, val leavesProperty: String?) {
     companion object {
         fun from(config: Map<String, String>): Settings {
-            Settings(false, "")
             val propertyBasedLeaves =
                 config.getOrDefault(SettingsKeys.PROPERTY_BASED_LEAVES, false).toString().toBoolean()
             val leavesProperty =
