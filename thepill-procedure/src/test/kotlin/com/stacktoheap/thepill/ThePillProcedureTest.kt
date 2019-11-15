@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.neo4j.driver.internal.value.MapValue
 import org.neo4j.driver.internal.value.NodeValue
 import org.neo4j.driver.v1.GraphDatabase
 import org.neo4j.harness.ServerControls
@@ -82,6 +83,65 @@ class ThePillProcedureLeafEntityTest {
                     .single().get(0) as NodeValue
 
                 assertTrue(resultFromDecision.get("value").asString() == "knowledge")
+            }
+        }
+    }
+
+    @Test
+    fun `test decision step traversal`() {
+        GraphDatabase.driver(dbServer.boltURI()).use { driver ->
+            driver.session().use { session ->
+                session.run(
+                    "" +
+                            "CREATE (tree:Tree { name: 'neo' })" +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', parameters:['chosenColor'], question: 'Red Pill Or Blue Pill', choice: 'result = {relationship: \"RED\"};' })" +
+                            "CREATE (red:Leaf { value: 'knowledge' })" +
+                            "CREATE (blue:Leaf { value: 'ignorance' })" +
+                            "CREATE (tree)-[:HAS]->(pill)" +
+                            "CREATE (pill)-[:RED]->(red)" +
+                            "CREATE (pill)-[:BLUE]->(blue)"
+
+                )
+
+                val resultFromTree = session.run("CALL com.stacktoheap.thepill.next_step('neo', {}) yield result return result")
+                    .single().get(0) as MapValue
+
+                assertTrue(resultFromTree.get("name").asString() == "Red Pill Or Blue Pill")
+                assertTrue(resultFromTree.get("question").asString() == "Red Pill Or Blue Pill")
+                assertThat(resultFromTree.get("parameters").asList().map {it.toString()}.containsAll(listOf("chosenColor")))
+
+                val resultFromDecision = session.run("CALL com.stacktoheap.thepill.next_step('Red Pill Or Blue Pill', {}) yield result return result")
+                    .list()
+
+                assertThat(resultFromDecision.map { it.asMap().get("value") }.containsAll(listOf("knowledge", "ignorance")))
+            }
+        }
+    }
+
+    @Test
+    fun `test decision step traversal from multiple decisions`() {
+        GraphDatabase.driver(dbServer.boltURI()).use { driver ->
+            driver.session().use { session ->
+                session.run(
+                    "" +
+                            "CREATE (tree:Tree { name: 'neo' })" +
+                            "CREATE (pill1: Decision { name: 'pill_decision', parameters:['chosenColor'], question: 'Red Pill Or Blue Pill?', choice: 'result = {relationship: \"RED\"};' })" +
+                            "CREATE (pill2: Decision { name: 'pill_decision', parameters:['chosenColor'], question: 'Blue Pill or Red Pill?', choice: 'result = {relationship: \"BLUE\"};' })" +
+                            "CREATE (red:Leaf { value: 'knowledge' })" +
+                            "CREATE (blue:Leaf { value: 'ignorance' })" +
+                            "CREATE (tree)-[:HAS]->(pill1)" +
+                            "CREATE (tree)-[:HAS]->(pill2)" +
+                            "CREATE (pill1)-[:RED]->(red)" +
+                            "CREATE (pill2)-[:RED]->(red)" +
+                            "CREATE (pill1)-[:BLUE]->(blue)" +
+                            "CREATE (pill2)-[:BLUE]->(blue)"
+
+                )
+
+                val resultFromDecision = session.run("CALL com.stacktoheap.thepill.next_step('pill_decision', {chosenColor: 'red'}) yield result return result")
+                    .list()
+
+                assertThat(resultFromDecision.map { it.asMap().get("value") }.containsAll(listOf("knowledge", "ignorance")))
             }
         }
     }

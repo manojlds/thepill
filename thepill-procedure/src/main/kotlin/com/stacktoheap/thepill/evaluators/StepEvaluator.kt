@@ -8,12 +8,14 @@ import org.neo4j.graphdb.traversal.BranchState
 import org.neo4j.graphdb.traversal.Evaluation
 import org.neo4j.graphdb.traversal.PathEvaluator
 
-class DecisionTreeEvaluator(private val settings: Settings) : PathEvaluator<StateInfo> {
+class StepEvaluator(private val settings: Settings) :
+    PathEvaluator<StateInfo> {
 
     override fun evaluate(path: Path, branchState: BranchState<StateInfo>?): Evaluation {
         return when {
             settings.propertyBasedLeaves and path.endNode().getProperty(settings.leavesProperty, false).toString().toBoolean() -> Evaluation.INCLUDE_AND_PRUNE
             !settings.propertyBasedLeaves and path.endNode().hasLabel(Labels.Leaf) -> Evaluation.INCLUDE_AND_PRUNE
+            path.length() == 1 -> Evaluation.INCLUDE_AND_PRUNE
             else -> Evaluation.EXCLUDE_AND_CONTINUE
         }
     }
@@ -22,4 +24,3 @@ class DecisionTreeEvaluator(private val settings: Settings) : PathEvaluator<Stat
         return null
     }
 }
-
