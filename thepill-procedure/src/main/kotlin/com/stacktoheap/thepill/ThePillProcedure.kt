@@ -53,15 +53,12 @@ class ThePillProcedure {
     }
 
     @Procedure(name = "com.stacktoheap.thepill.next_step", mode = Mode.READ)
-    @Description("CALL com.stacktoheap.thepill.next_step(current_node, facts) - Apply decisions one step at a time")
+    @Description("CALL com.stacktoheap.thepill.next_step(current_node_name, node_id, facts) - Apply decisions one step at a time")
     @Throws(IOException::class)
-    fun nextStep(@Name("current_node") name: String, @Name("facts") facts: Map<String, Any>): Stream<StepResult>? {
-
-        val treeNode = db?.findNode(Labels.Tree, "name", name)
-        val startNodes = if(treeNode != null) {
-            listOf(treeNode)
-        } else {
-            db?.findNodes(Labels.Decision, "name", name)?.asSequence()?.toList()
+    fun nextStep(@Name("current_node") name: String, @Name("facts") facts: Map<String, Any>, @Name("node_id", defaultValue = "-1") nodeId: Long = -1): Stream<StepResult>? {
+        val startNodes = when {
+            nodeId != -1L -> listOf(db?.getNodeById(nodeId))
+            else -> nodesByName(name)
         }
 
         return if (startNodes?.isNotEmpty() == true) {
@@ -72,6 +69,15 @@ class ThePillProcedure {
 
             makeDecisionTraversal.traverse(startNodes).stream().map { StepResult.from(it) }
         } else null
+    }
+
+    private fun nodesByName(name: String): List<Node?>? {
+        val treeNode = db?.findNode(Labels.Tree, "name", name)
+        return if (treeNode != null) {
+            listOf(treeNode)
+        } else {
+            db?.findNodes(Labels.Decision, "name", name)?.asSequence()?.toList()
+        }
     }
 
 }
