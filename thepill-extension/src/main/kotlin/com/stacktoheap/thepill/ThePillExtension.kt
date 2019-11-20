@@ -1,12 +1,11 @@
 package com.stacktoheap.thepill
-import org.neo4j.string.UTF8
+import org.codehaus.jackson.map.ObjectMapper
 import org.neo4j.graphdb.GraphDatabaseService
+import org.neo4j.helpers.collection.MapUtil
 import javax.ws.rs.*
 import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
-import org.codehaus.jackson.map.ObjectMapper
-import org.neo4j.helpers.collection.MapUtil
 
 @Path("")
 class ThePillExtension(@Context val graphDb: GraphDatabaseService) {
