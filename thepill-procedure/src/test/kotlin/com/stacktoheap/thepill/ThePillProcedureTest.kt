@@ -65,7 +65,8 @@ class ThePillProcedureLeafEntityTest {
                 session.run(
                     "" +
                             "CREATE (tree:Tree { name: 'neo' })" +
-                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill', choice: 'result = {relationship: \"RED\"};' })" +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill'," +
+                            "parameters:'[]', choice: 'result = {relationship: \"RED\"};' })" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
                             "CREATE (blue:Leaf { value: 'ignorance' })" +
                             "CREATE (tree)-[:HAS]->(pill)" +
@@ -94,7 +95,7 @@ class ThePillProcedureLeafEntityTest {
                 session.run(
                     "" +
                             "CREATE (tree:Tree { name: 'neo' })" +
-                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', parameters:['chosenColor'], question: 'Red Pill Or Blue Pill', choice: 'result = {relationship: \"RED\"};' })" +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', parameters:'[{\"name\": \"chosenColor\", \"type\": \"string\"}]', question: 'Red Pill Or Blue Pill', choice: 'result = {relationship: \"RED\"};' })" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
                             "CREATE (blue:Leaf { value: 'ignorance' })" +
                             "CREATE (tree)-[:HAS]->(pill)" +
@@ -109,7 +110,7 @@ class ThePillProcedureLeafEntityTest {
                 assertTrue(resultFromTree.get("decisionId").asLong() > 0)
                 assertTrue(resultFromTree.get("name").asString() == "Red Pill Or Blue Pill")
                 assertTrue(resultFromTree.get("question").asString() == "Red Pill Or Blue Pill")
-                assertThat(resultFromTree.get("parameters").asList().map {it.toString()}.containsAll(listOf("chosenColor")))
+                assertThat(resultFromTree.get("parameters").asList().map {(it as Map<String, Any>).get("name")}).containsAll(listOf("chosenColor"))
 
                 val resultFromDecision = session.run("CALL com.stacktoheap.thepill.next_step('Red Pill Or Blue Pill', {chosenColor: 'red'}) yield result return result")
                     .single().get(0) as MapValue
@@ -126,8 +127,8 @@ class ThePillProcedureLeafEntityTest {
                 session.run(
                     "" +
                             "CREATE (tree:Tree { name: 'neo' })" +
-                            "CREATE (pill1: Decision { name: 'pill_decision', parameters:['chosenColor'], question: 'Red Pill Or Blue Pill?', choice: 'result = {relationship: \"RED\"};' })" +
-                            "CREATE (pill2: Decision { name: 'pill_decision', parameters:['chosenColor'], question: 'Blue Pill or Red Pill?', choice: 'result = {relationship: \"BLUE\"};' })" +
+                            "CREATE (pill1: Decision { name: 'pill_decision', parameters:'[{\"name\": \"chosenColor\", \"type\": \"string\"}]', question: 'Red Pill Or Blue Pill?', choice: 'result = {relationship: \"RED\"};' })" +
+                            "CREATE (pill2: Decision { name: 'pill_decision', parameters:'[{\"name\": \"chosenColor\", \"type\": \"string\"}]', question: 'Blue Pill or Red Pill?', choice: 'result = {relationship: \"BLUE\"};' })" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
                             "CREATE (blue:Leaf { value: 'ignorance' })" +
                             "CREATE (tree)-[:HAS]->(pill1)" +
@@ -154,9 +155,9 @@ class ThePillProcedureLeafEntityTest {
                 session.run(
                     "" +
                             "CREATE (tree:Tree { name: 'neo' })" +
-                            "CREATE (ready: Decision { name: 'are_you_ready', parameters:['ready'], question: 'Are you ready?', choice: 'result = {relationship: \"YES\"}; if(!ready) result = {relationship: \"NO\"};' })" +
-                            "CREATE (pill1: Decision { name: 'pill_decision', parameters:['chosenColor'], question: 'Red Pill Or Blue Pill?', choice: 'result = {relationship: \"RED\"};' })" +
-                            "CREATE (pill2: Decision { name: 'pill_decision', parameters:['chosenColor'], question: 'Blue Pill or Red Pill?', choice: 'result = {relationship: \"BLUE\"};' })" +
+                            "CREATE (ready: Decision { name: 'are_you_ready', parameters:'[{\"name\": \"ready\", \"type\": \"boolean\"}]', question: 'Are you ready?', choice: 'result = {relationship: \"YES\"}; if(!ready) result = {relationship: \"NO\"};' })" +
+                            "CREATE (pill1: Decision { name: 'pill_decision', parameters:'[{\"name\": \"chosenColor\", \"type\": \"string\"}]', question: 'Red Pill Or Blue Pill?', choice: 'result = {relationship: \"RED\"};' })" +
+                            "CREATE (pill2: Decision { name: 'pill_decision', parameters:'[{\"name\": \"chosenColor\", \"type\": \"string\"}]', question: 'Blue Pill or Red Pill?', choice: 'result = {relationship: \"BLUE\"};' })" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
                             "CREATE (blue:Leaf { value: 'ignorance' })" +
                             "CREATE (tree)-[:HAS]->(ready)" +
@@ -177,7 +178,7 @@ class ThePillProcedureLeafEntityTest {
                 val nextDecisionName = resultFromReadyDecision.get("name").asString()
                 assertTrue(nextDecisionName == "pill_decision")
                 assertTrue(resultFromReadyDecision.get("question").asString() == "Red Pill Or Blue Pill?")
-                assertThat(resultFromReadyDecision.get("parameters").asList().map {it.toString()}.containsAll(listOf("chosenColor")))
+                assertThat(resultFromReadyDecision.get("parameters").asList().map {(it as Map<String, Any>).get("name")}).containsAll(listOf("chosenColor"))
 
                 val resultFromNextStep = session.run("CALL com.stacktoheap.thepill.next_step('$nextDecisionName', {chosenColor: 'blue'}, $nextDecisionId) yield result return result")
                     .single().get(0) as MapValue
@@ -199,7 +200,7 @@ class ThePillProcedureLeafEntityTest {
                 session.run(
                     "" +
                             "CREATE (tree:Tree { name: 'neo' })" +
-                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill'," +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill', parameters:'[{\"name\": \"chosenColor\", \"type\": \"string\"}]'," +
                                     "choice: 'result = {relationship: \"RED\"}; if(chosenColor === \"blue\") result = {relationship: \"BLUE\"};' })" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
                             "CREATE (blue:Leaf { value: 'ignorance' })" +
@@ -229,7 +230,7 @@ class ThePillProcedureLeafEntityTest {
                 session.run(
                     "" +
                             "CREATE (tree:Tree { name: 'neo' })" +
-                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill'," +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill', parameters:'[{\"name\": \"chosenColor\", \"type\": \"string\"}]'," +
                                     "choice: 'result = {relationship: \"COLOR\", properties: {color: \"red\"}}; if(chosenColor === \"blue\") result = {relationship: \"COLOR\" , properties: {color: \"blue\"}};' })" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
                             "CREATE (blue:Leaf { value: 'ignorance' })" +
@@ -248,13 +249,38 @@ class ThePillProcedureLeafEntityTest {
     }
 
     @Test
+    fun `test decision tree traversal with numeric relationship properties`() {
+        GraphDatabase.driver(dbServer.boltURI()).use { driver ->
+            driver.session().use { session ->
+                session.run(
+                    "" +
+                            "CREATE (tree:Tree { name: 'neo' })" +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill', parameters:'[{\"name\": \"chosenColor\", \"type\": \"string\"}]'," +
+                                    "choice: 'result = {relationship: \"COLOR\", properties: {color: 1}}; if(chosenColor === \"blue\") result = {relationship: \"COLOR\" , properties: {color: 2}};' })" +
+                            "CREATE (red:Leaf { value: 'knowledge' })" +
+                            "CREATE (blue:Leaf { value: 'ignorance' })" +
+                            "CREATE (tree)-[:HAS]->(pill)" +
+                            "CREATE (pill)-[:COLOR {color: 1}]->(red)" +
+                            "CREATE (pill)-[:COLOR {color: 2}]->(blue)"
+
+                )
+
+                val result = session.run("CALL com.stacktoheap.thepill.make_decision('neo', {chosenColor: \"blue\"}) yield path return last(nodes(path))")
+                    .single().get(0) as NodeValue
+
+                assertTrue(result.get("value").asString() == "ignorance")
+            }
+        }
+    }
+
+    @Test
     fun `test multi decision result`() {
         GraphDatabase.driver(dbServer.boltURI()).use { driver ->
             driver.session().use { session ->
                 session.run(
                     "" +
                             "CREATE (tree:Tree { name: 'neo' })" +
-                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill'," +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill', parameters:'[{\"name\": \"chosenColor\", \"type\": \"string\"}]'," +
                                     "choice: 'result = {relationship: \"COLOR\" };'})" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
                             "CREATE (blue:Leaf { value: 'ignorance' })" +
@@ -277,7 +303,7 @@ class ThePillProcedureLeafEntityTest {
                 session.run(
                     "" +
                             "CREATE (tree:Tree { name: 'neo' })" +
-                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill', parameters: ['chosenColor']," +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill', parameters:'[{\"name\": \"chosenColor\", \"type\": \"string\"}]'," +
                             "choice: 'result = {relationship: \"COLOR\", properties: {color: \"red\"}}; if(chosenColor === \"blue\") result = {relationship: \"COLOR\" , properties: {color: \"blue\"}};' })" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
                             "CREATE (blue:Leaf { value: 'ignorance' })" +
@@ -324,7 +350,7 @@ class ThePillProcedureLeafPropertyTest {
                 session.run(
                     "" +
                             "CREATE (tree:Tree { name: 'neo' })" +
-                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill', choice: 'result = {relationship: \"RED\"};' })" +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill', parameters:'[]', choice: 'result = {relationship: \"RED\"};' })" +
                             "CREATE (red:Pill { is_leaf: true, value: 'knowledge' })" +
                             "CREATE (blue:Pill { is_leaf: true, value: 'ignorance' })" +
                             "CREATE (tree)-[:HAS]->(pill)" +
