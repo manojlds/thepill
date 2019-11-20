@@ -40,7 +40,7 @@ class ThePillExtensionTest {
                 session.run(
                     "" +
                             "CREATE (tree:Tree { name: 'neo' })" +
-                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill', parameters: ['chosenColor']," +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill',parameters:'[{\"name\": \"chosenColor\", \"type\": \"string\"}]'," +
                             "choice: 'result = {relationship: \"COLOR\", properties: {color: \"red\"}}; if(chosenColor === \"blue\") result = {relationship: \"COLOR\" , properties: {color: \"blue\"}};' })" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
                             "CREATE (blue:Leaf { value: 'ignorance' })" +
@@ -65,7 +65,7 @@ class ThePillExtensionTest {
                 session.run(
                     "" +
                             "CREATE (tree:Tree { name: 'neo' })" +
-                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', parameters:['chosenColor'], question: 'Red Pill Or Blue Pill', choice: 'result = {relationship: \"RED\"};' })" +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', parameters:'[{\"name\": \"chosenColor\", \"type\": \"string\"}]', question: 'Red Pill Or Blue Pill', choice: 'result = {relationship: \"RED\"};' })" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
                             "CREATE (blue:Leaf { value: 'ignorance' })" +
                             "CREATE (tree)-[:HAS]->(pill)" +
@@ -94,9 +94,9 @@ class ThePillExtensionTest {
                 session.run(
                     "" +
                             "CREATE (tree:Tree { name: 'neo' })" +
-                            "CREATE (ready: Decision { name: 'are_you_ready', parameters:['ready'], question: 'Are you ready?', choice: 'result = {relationship: \"YES\"}; if(!ready) result = {relationship: \"NO\"};' })" +
-                            "CREATE (pill1: Decision { name: 'pill_decision', parameters:['chosenColor'], question: 'Red Pill Or Blue Pill?', choice: 'result = {relationship: \"RED\"};' })" +
-                            "CREATE (pill2: Decision { name: 'pill_decision', parameters:['chosenColor'], question: 'Blue Pill or Red Pill?', choice: 'result = {relationship: \"BLUE\"};' })" +
+                            "CREATE (ready: Decision { name: 'are_you_ready', parameters:'[{\"name\": \"ready\", \"type\": \"boolean\"}]', question: 'Are you ready?', choice: 'result = {relationship: \"YES\"}; if(!ready) result = {relationship: \"NO\"};' })" +
+                            "CREATE (pill1: Decision { name: 'pill_decision', parameters:'[{\"name\": \"chosenColor\", \"type\": \"string\"}]', question: 'Red Pill Or Blue Pill?', choice: 'result = {relationship: \"RED\"};' })" +
+                            "CREATE (pill2: Decision { name: 'pill_decision', parameters:'[{\"name\": \"chosenColor\", \"type\": \"string\"}]', question: 'Blue Pill or Red Pill?', choice: 'result = {relationship: \"BLUE\"};' })" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
                             "CREATE (blue:Leaf { value: 'ignorance' })" +
                             "CREATE (tree)-[:HAS]->(ready)" +
