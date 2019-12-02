@@ -36,7 +36,6 @@ class DecisionTreeExpander(private val facts: Map<String, Any>, private val igno
                 RelationshipTypes.HAS
             )
             endNode.hasLabel(Labels.Decision) -> try {
-                val nodeProperties = endNode.allProperties
                 val parameters = endNode.parameters()
 
                 when {
@@ -61,10 +60,6 @@ class DecisionTreeExpander(private val facts: Map<String, Any>, private val igno
         for (parameter in parameters) {
             engine.put(parameter.name, parameter.valueFrom(facts))
         }
-        for (key in facts) {
-            engine.put(key.key, key.value)
-        }
-
         val choiceScript = endNode.allProperties["choice"] as String
 
         engine.eval(choiceScript)

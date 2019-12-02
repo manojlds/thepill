@@ -4,7 +4,9 @@ import kotlin.reflect.KClass
 
 enum class ParameterType(val value: String, val type: KClass<*>) {
     StringType("string", String::class),
-    IntType("integer", Integer::class),
+    IntType("integer", Long::class),
+    LongType("long", Long::class),
+    FloatType("float", Double::class),
     DoubleType("double", Double::class),
     BooleanType("boolean", Boolean::class);
 

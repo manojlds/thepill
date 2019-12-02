@@ -89,6 +89,36 @@ class ThePillProcedureLeafEntityTest {
     }
 
     @Test
+    fun `test decision tree traversal with parameters`() {
+        GraphDatabase.driver(dbServer.boltURI()).use { driver ->
+            driver.session().use { session ->
+                session.run(
+                    "" +
+                            "CREATE (tree:Tree { name: 'neo' })" +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill'," +
+                            "parameters:'[{\"name\": \"param1\", \"type\": \"string\"}, {\"name\": \"param2\", \"type\": \"integer\"}, {\"name\": \"param3\", \"type\": \"float\"}]', choice: 'result = {relationship: \"COLOR\", properties: {\"parameter\": param1 + param2 + param3}};' })" +
+                            "CREATE (red:Leaf { value: 'knowledge' })" +
+                            "CREATE (blue:Leaf { value: 'ignorance' })" +
+                            "CREATE (tree)-[:HAS]->(pill)" +
+                            "CREATE (pill)-[:COLOR {parameter: \"param123\"}]->(red)" +
+                            "CREATE (pill)-[:COLOR {parameter: \"param321\"}]->(blue)"
+
+                )
+
+                val resultFromTree = session.run("CALL com.stacktoheap.thepill.make_decision('neo', {param1: 'param1', param2: 2, param3: 3.0}) yield path return last(nodes(path))")
+                    .single().get(0) as NodeValue
+
+                assertTrue(resultFromTree.get("value").asString() == "knowledge")
+
+                val resultFromDecision = session.run("CALL com.stacktoheap.thepill.make_decision('Red Pill Or Blue Pill', {param1: 'param1', param2: 2, param3: 3.0}) yield path return last(nodes(path))")
+                    .single().get(0) as NodeValue
+
+                assertTrue(resultFromDecision.get("value").asString() == "knowledge")
+            }
+        }
+    }
+
+    @Test
     fun `test decision step traversal`() {
         GraphDatabase.driver(dbServer.boltURI()).use { driver ->
             driver.session().use { session ->
