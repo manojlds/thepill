@@ -77,13 +77,19 @@ subprojects {
 
 }
 
+project(":thepill-common") {
+}
+
 project(":thepill-procedure") {
+    dependencies {
+        compile project(':thepill-common')
+    }
 }
 
 project(":thepill-extension") {
     dependencies {
         compileOnly group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0'
-        compile group: 'org.codehaus.jackson', name: 'jackson-mapper-asl', version: '1.9.7'
+        compile project(':thepill-common')
         testCompile project(':thepill-procedure')
         testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
     }

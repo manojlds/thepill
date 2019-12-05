@@ -124,8 +124,6 @@ class ThePillExtensionTest {
                 val decisionResult = result[0]["stepResult"]
 
                 assertThat(decisionResult!!["value"]).isEqualTo("knowledge")
-
-
             }
         }
     }

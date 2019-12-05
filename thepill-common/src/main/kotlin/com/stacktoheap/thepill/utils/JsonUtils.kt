@@ -12,6 +12,9 @@ object JsonUtils {
         is Number -> JsonPrimitive(this)
         is String -> JsonPrimitive(this)
         is Boolean -> JsonPrimitive(this)
+        is Map<*, *> -> this.toJsonObject()
+        is Iterable<*> -> JsonArray(this.map { it.toJsonElement() })
+        is Array<*> -> JsonArray(this.map { it.toJsonElement() })
         else -> {
             val jsonParser = Json(JsonConfiguration.Stable)
             val serializer = jsonParser.context.getContextualOrDefault(this)
@@ -21,6 +24,8 @@ object JsonUtils {
 
     fun JsonElement.toPrimitive(): Any? = when (this) {
         is JsonNull -> null
+        is JsonObject -> this.toPrimitiveMap()
+        is JsonArray -> this.map { it.toPrimitive() }
         is JsonLiteral -> {
             if (isString) {
                 contentOrNull
