@@ -1,7 +1,6 @@
 package com.stacktoheap.thepill.results
 
 import com.stacktoheap.thepill.schema.Labels
-import com.stacktoheap.thepill.utils.parameters
 import com.stacktoheap.thepill.utils.parametersMap
 import org.neo4j.graphdb.Path
 
