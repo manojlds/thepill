@@ -33,6 +33,10 @@ data class Parameter(val name: String, val type: ParameterType, val possibleValu
     }
 
     fun valueFrom(facts: Map<String, Any>): Any {
-        return type.type.javaObjectType.cast(facts[name])
+        val factValue = facts[name]
+        return when  {
+            factValue is Long && type == ParameterType.DoubleType  -> factValue.toDouble()
+            else ->  type.type.javaObjectType.cast(factValue)
+        }
     }
 }

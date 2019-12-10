@@ -96,21 +96,21 @@ class ThePillProcedureLeafEntityTest {
                     "" +
                             "CREATE (tree:Tree { name: 'neo' })" +
                             "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill'," +
-                            "parameters:'[{\"name\": \"param1\", \"type\": \"string\"}, {\"name\": \"param2\", \"type\": \"integer\"}, {\"name\": \"param3\", \"type\": \"float\"}]', choice: 'result = {relationship: \"COLOR\", properties: {\"parameter\": param1 + param2 + param3}};' })" +
+                            "parameters:'[{\"name\": \"param1\", \"type\": \"string\"}, {\"name\": \"param2\", \"type\": \"integer\"}, {\"name\": \"param3\", \"type\": \"float\"}, {\"name\": \"param4\", \"type\": \"double\"}]', choice: 'result = {relationship: \"COLOR\", properties: {\"parameter\": param1 + param2 + param3 + param4}};' })" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
                             "CREATE (blue:Leaf { value: 'ignorance' })" +
                             "CREATE (tree)-[:HAS]->(pill)" +
-                            "CREATE (pill)-[:COLOR {parameter: \"param123\"}]->(red)" +
-                            "CREATE (pill)-[:COLOR {parameter: \"param321\"}]->(blue)"
+                            "CREATE (pill)-[:COLOR {parameter: \"param1234\"}]->(red)" +
+                            "CREATE (pill)-[:COLOR {parameter: \"param4321\"}]->(blue)"
 
                 )
 
-                val resultFromTree = session.run("CALL com.stacktoheap.thepill.make_decision('neo', {param1: 'param1', param2: 2, param3: 3.0}) yield path return last(nodes(path))")
+                val resultFromTree = session.run("CALL com.stacktoheap.thepill.make_decision('neo', {param1: 'param1', param2: 2, param3: 3.0, param4: 4}) yield path return last(nodes(path))")
                     .single().get(0) as NodeValue
 
                 assertTrue(resultFromTree.get("value").asString() == "knowledge")
 
-                val resultFromDecision = session.run("CALL com.stacktoheap.thepill.make_decision('Red Pill Or Blue Pill', {param1: 'param1', param2: 2, param3: 3.0}) yield path return last(nodes(path))")
+                val resultFromDecision = session.run("CALL com.stacktoheap.thepill.make_decision('Red Pill Or Blue Pill', {param1: 'param1', param2: 2, param3: 3.0, param4: 4}) yield path return last(nodes(path))")
                     .single().get(0) as NodeValue
 
                 assertTrue(resultFromDecision.get("value").asString() == "knowledge")
