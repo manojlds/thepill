@@ -27,11 +27,16 @@ enum class ParameterType(val value: String, @Transient val type: KClass<*>) {
 }
 
 @Serializable
-data class Parameter(val name: String, val type: ParameterType, val possibleValues: Array<@Serializable(with = JsonUtils.AnySerializer::class) Any>? = null) {
-    fun values(): List<Any>? {
-        return possibleValues?.map { type.type.javaObjectType.cast(it) }
-    }
+data class ParameterRange(val min: @Serializable(with = JsonUtils.AnySerializer::class)Any, val max: @Serializable(with = JsonUtils.AnySerializer::class)Any, val step: @Serializable(with = JsonUtils.AnySerializer::class) Any)
 
+@Serializable
+data class ParameterValues(val displayName: String, val value: @Serializable(with = JsonUtils.AnySerializer::class) Any)
+
+@Serializable
+data class ParameterMetadata(val possibleValues: Array<ParameterValues>? = null, val range: ParameterRange? = null) {}
+
+@Serializable
+data class Parameter(val name: String, val type: ParameterType, val metadata: ParameterMetadata? = null) {
     fun valueFrom(facts: Map<String, Any>): Any {
         val factValue = facts[name]
         return when  {

@@ -65,7 +65,7 @@ class ThePillExtensionTest {
                 session.run(
                     "" +
                             "CREATE (tree:Tree { name: 'neo' })" +
-                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', parameters:'[{\"name\": \"chosenColor\", \"type\": \"string\"}]', question: 'Red Pill Or Blue Pill', choice: 'result = {relationship: \"RED\"};' })" +
+                            "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', parameters:'[{\"name\": \"chosenColor\", \"type\": \"string\", \"metadata\":{\"possibleValues\":[{\"displayName\":\"No\",\"value\":false},{\"displayName\":\"Yes\",\"value\":true}]}}]', question: 'Red Pill Or Blue Pill', choice: 'result = {relationship: \"RED\"};' })" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
                             "CREATE (blue:Leaf { value: 'ignorance' })" +
                             "CREATE (tree)-[:HAS]->(pill)" +
