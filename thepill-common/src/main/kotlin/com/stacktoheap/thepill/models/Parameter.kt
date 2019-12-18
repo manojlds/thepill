@@ -27,10 +27,10 @@ enum class ParameterType(val value: String, @Transient val type: KClass<*>) {
 }
 
 @Serializable
-data class ParameterRange(val min: @Serializable(with = JsonUtils.AnySerializer::class)Any, val max: @Serializable(with = JsonUtils.AnySerializer::class)Any, val step: @Serializable(with = JsonUtils.AnySerializer::class) Any)
+data class ParameterRange(val min: @Serializable(with = JsonUtils.AnySerializer::class)Any? = null, val max: @Serializable(with = JsonUtils.AnySerializer::class)Any? = null, val step: @Serializable(with = JsonUtils.AnySerializer::class) Any? = null)
 
 @Serializable
-data class ParameterValues(val displayName: String, val value: @Serializable(with = JsonUtils.AnySerializer::class) Any)
+data class ParameterValues(val displayName: String, val value: @Serializable(with = JsonUtils.AnySerializer::class) Any?)
 
 @Serializable
 data class ParameterMetadata(val possibleValues: Array<ParameterValues>? = null, val range: ParameterRange? = null) {}

@@ -96,7 +96,7 @@ class ThePillProcedureLeafEntityTest {
                     "" +
                             "CREATE (tree:Tree { name: 'neo' })" +
                             "CREATE (pill: Decision { name: 'Red Pill Or Blue Pill', question: 'Red Pill Or Blue Pill'," +
-                            "parameters:'[{\"name\": \"param1\", \"type\": \"string\"}, {\"name\": \"param2\", \"type\": \"integer\"}, {\"name\": \"param3\", \"type\": \"float\"}, {\"name\": \"param4\", \"type\": \"double\"}]', choice: 'result = {relationship: \"COLOR\", properties: {\"parameter\": param1 + param2 + param3 + param4}};' })" +
+                            "parameters:'[{\"name\": \"param1\", \"type\": \"string\"}, {\"name\": \"param2\", \"type\": \"integer\"}, {\"name\": \"param3\", \"type\": \"float\"}, {\"name\": \"param4\", \"type\": \"double\", \"metadata\": {\"possibleValues\": [{\"displayName\": \"0\", \"value\": 0}, {\"displayName\": \">= 0.1, <= 24.99\", \"value\": 12.545}, {\"displayName\": \">= 25, <= 50\", \"value\": 37.5}, {\"displayName\": \"> 50\", \"value\": 50.1}], \"range\": {\"min\": 0, \"max\": null, \"step\": 0.1}}}]', choice: 'result = {relationship: \"COLOR\", properties: {\"parameter\": param1 + param2 + param3 + param4}};' })" +
                             "CREATE (red:Leaf { value: 'knowledge' })" +
                             "CREATE (blue:Leaf { value: 'ignorance' })" +
                             "CREATE (tree)-[:HAS]->(pill)" +
@@ -131,7 +131,6 @@ class ThePillProcedureLeafEntityTest {
                             "CREATE (tree)-[:HAS]->(pill)" +
                             "CREATE (pill)-[:RED]->(red)" +
                             "CREATE (pill)-[:BLUE]->(blue)"
-
                 )
 
                 val resultFromTree = session.run("CALL com.stacktoheap.thepill.next_step('neo', {}) yield result return result")

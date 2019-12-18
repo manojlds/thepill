@@ -13,7 +13,7 @@ fun Node.parameters(): List<Parameter> {
 }
 
 @UnstableDefault
-fun Node.parametersMap(): List<Map<String, Any>> {
+fun Node.parametersMap(): List<Map<String, Any?>> {
     val parametersJsonString = allProperties["parameters"] as String
     return Json.parse(JsonUtils.MapSerializer.list, parametersJsonString)
 }

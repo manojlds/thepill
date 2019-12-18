@@ -57,7 +57,7 @@ class ThePillExtension(@Context val graphDb: GraphDatabaseService) {
     private fun formatMap(result: List<Map<String, Any>>) = Json.stringify(JsonUtils.MapSerializer.list, result)
 
     @UnstableDefault
-    private fun parseMap(value: String?): Map<String, Any> =
+    private fun parseMap(value: String?): Map<String, Any?> =
         if (value == null || value.isNullOrBlank() || value == "null") emptyMap()
         else {
             val v = value.trim('"', ' ', '\t', '\n', '\r')
