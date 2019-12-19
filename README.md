@@ -3,6 +3,8 @@ Decision Trees with Neo4J
 
 ![](https://github.com/manojlds/thepill/workflows/Build/badge.svg)
 
+[Features](#features) | [Example](#example) | [Procedure Installation](#procedure-installation) | [Extension Installation](#extension-installation) | [Build](#build) | [Notes](#notes)
+
 <p align="center">
 <img src="docs/images/decision_tree.png" width="600px"/>
 </p>
@@ -30,7 +32,7 @@ CALL com.stacktoheap.thepill.make_decision('neo', {chosenColor: "blue"}) yield p
 ```
 
 
-## Example explained
+### Example explained
 
 Create the root of the tree:
 
@@ -131,7 +133,7 @@ Compile and run tests with `./gradlew build`
 
 Create fat jar with `./gradlew shadowJar` 
 
-## Note
+## Notes
 
 Based on - https://github.com/maxdemarzi/decision_trees_with_rules
 
